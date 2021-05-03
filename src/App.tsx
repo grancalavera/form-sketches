@@ -1,16 +1,8 @@
-import React, { useEffect, useState } from "react";
-import {
-  Control,
-  FieldPath,
-  FieldValues,
-  RegisterOptions,
-  useController,
-  useFieldArray,
-  useForm,
-} from "react-hook-form";
+import React, { useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
 import "react/jsx-runtime";
 import "./App.css";
-import { useFieldFormat } from "./form/use-field-format";
+import { TextInputWithClearAndFormat } from "./form/text-input-with-clear-and-format";
 
 interface Fields {
   people: Person[];
@@ -20,11 +12,6 @@ interface Person {
   firstName: string;
   lastName: string;
 }
-
-type ValidationRules = Omit<
-  RegisterOptions,
-  "valueAsNumber" | "valueAsDate" | "setValueAs"
->;
 
 const person = (): Person => ({ firstName: "", lastName: "" });
 
@@ -47,66 +34,6 @@ const ErrorBox: React.FC = ({ children }) => (
     {children}
   </div>
 );
-
-interface TextInputProps<
-  TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
-> {
-  control: Control<TFieldValues>;
-  name: TName;
-  placeholder: string;
-  rules?: ValidationRules;
-  format?: (x: string) => string;
-  defaultValue?: string;
-}
-
-const TextInputWithClearAndFormat = <
-  TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
->({
-  control,
-  name,
-  placeholder,
-  rules,
-  format = (x) => x,
-  defaultValue = "",
-}: TextInputProps<TFieldValues, TName>) => {
-  const { field } = useController<TFieldValues, TName>({
-    control,
-    name,
-    rules,
-    defaultValue,
-  });
-
-  const fieldFormat = useFieldFormat({
-    format,
-    defaultValue,
-  });
-
-  useEffect(() => field.onChange(fieldFormat.inputValue), [
-    fieldFormat.inputValue,
-    field,
-  ]);
-
-  return (
-    <span style={{ marginRight: 10 }}>
-      <input
-        ref={field.ref}
-        name={field.name}
-        value={fieldFormat.displayValue}
-        onChange={fieldFormat.onChange}
-        onFocus={fieldFormat.onFocus}
-        onBlur={() => {
-          fieldFormat.onBlur();
-          field.onBlur();
-        }}
-        placeholder={placeholder}
-        autoComplete="off"
-      />
-      <button onClick={() => fieldFormat.onChange("")}>clear</button>
-    </span>
-  );
-};
 
 export default function App() {
   const { control, formState, handleSubmit } = useForm<Fields>({
